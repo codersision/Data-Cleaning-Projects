@@ -1,0 +1,25 @@
+select * from projects.dbo.[Online Retail]
+
+--cleaning data
+;with onlineretailcte as
+(
+	select * from projects.dbo.[Online Retail]
+	where customerid is not null
+),
+quantityprice as
+(
+	select * from onlineretailcte
+	where Quantity>0 and UnitPrice>0
+),nonduplicaterows as
+(
+select *,
+ROW_NUMBER()over (partition by invoiceno,stockcode,quantity order by invoicedate)row_num
+from quantityprice
+)
+select *
+into #online_retail_new
+from nonduplicaterows 
+where row_num=1
+
+select * from #online_retail_new
+where row_num>1
